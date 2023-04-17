@@ -2,7 +2,7 @@
 **/.terraform/*
 
 #   cxdgcp service account credentials
-./gcpkey.json
+gcpkey.json
 
 # .tfstate files
 *.tfstate
