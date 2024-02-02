@@ -6,10 +6,14 @@ resource "google_compute_network" "akshay_vpc" {
 }
 
 
-data "google_compute_network" "akshay_vpc_details" {
-  name = "akshay_vpc"
+data "google_compute_network" "ak_vpc" {
+  name = "default"
 }
 
+resource "google_service_account" "gce-sa" {
+  account_id   = "gce-sa"
+  display_name = "Custom SA for VM Instance"
+}
 #Create VM
 
 resource "google_compute_instance" "compute_instance" {
@@ -20,15 +24,26 @@ resource "google_compute_instance" "compute_instance" {
     boot_disk {
         initialize_params {
           image = "ubuntu-os-cloud/ubuntu-2004-lts" 
+          size = 50
+          type = "SSD persistent disk"
           labels = {
             my_label = "akshay"
           }
         }
     }
     network_interface {
-      network = data.google_compute_network.akshay_vpc_details.name
+      network = data.google_compute_network.ak_vpc.name
     }
     metadata_startup_script = "sudo apt update -y; sudo apt install nginx -y"
+    metadata = {
+    google-monitoring-enabled = "true"
+  }
+  service_account {
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    email  = google_service_account.gce-sa.email
+    scopes = ["cloud-platform"]
+  }
+
 }
 
 
