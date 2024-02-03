@@ -22,27 +22,44 @@ resource "google_compute_instance" "compute_instance" {
     zone = "us-central1-a"
 
     boot_disk {
+        mode = "READ_WRITE"
+        auto_delete = true
+        device_name = "akshay-instance-tester"
         initialize_params {
-          image = "ubuntu-os-cloud/ubuntu-2004-lts" 
+          image = "projects/cos-cloud/global/images/cos-stable-109-17800-66-65"
           size = 50
-          type = "SSD persistent disk"
+          type = "pd-ssd"
           labels = {
             my_label = "akshay"
           }
         }
+        
     }
     network_interface {
       network = data.google_compute_network.ak_vpc.name
+      access_config {
+      network_tier = "PREMIUM"
     }
-    metadata_startup_script = "sudo apt update -y; sudo apt install nginx -y"
+    queue_count = 0
+    stack_type  = "IPV4_ONLY"
+    subnetwork  = "projects/akshay-412311/regions/us-central1/subnetworks/default"
+    }
+    # metadata_startup_script = "sudo apt update -y; sudo apt install nginx -y"
     metadata = {
     google-monitoring-enabled = "true"
+    gce-container-declaration = "spec:\n  containers:\n  - name: instance-1\n    image: nginx\n    stdin: false\n    tty: false\n  restartPolicy: Always\n# This container declaration format is not public API and may change without notice. Please\n# use gcloud command-line tool or Google Cloud Console to run Containers on Google Compute Engine."
+
   }
   service_account {
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     email  = google_service_account.gce-sa.email
     scopes = ["cloud-platform"]
   }
+  labels = {
+    container-vm = "cos-stable-109-17800-66-65"
+    goog-ec-src  = "vm_add-tf"
+  }
+  tags = ["http-server", "https-server"]
 
 }
 
