@@ -15,12 +15,33 @@
 module "gce_instance_template" {
   source = "../../modules/instance_template"
 
+  vm_name         = "akshay-vm-instance-terra"
+  vm_container    = "nginx"
+  vpc_network     = "default"
+  vm_zone         = "us-central1-a"
+  vm_tags         = ["http-server", "https-server", "allow-health-check"] 
+  vm_machine_type = "e2-micro"
+
+  boot_disk_size  = 10
+  boot_disk_type  = "pd-ssd"
+
 }
 
-# module "name" {
-#   source = "../../modules/mig"
-# }
+module "gce_instance_group" {
+  source = "../../modules/mig"
 
+  vm_name = "akshay-vm-instance-terra"
+  zone    = "us-central1-a"
+  target_size = "1"
+}
+
+
+module "gce_loadbalancer" {
+  source = "../../modules/loadbalancer"
+
+  vm_name = "akshay-vm-instance-terra"
+  zone    = "us-central1-a"
+}
 
 
 # #m1-----------------------------------------------------------------------------------------

@@ -16,9 +16,7 @@ variable "vm_zone" {
 variable "vm_tags" {
   default = ["http-server", "https-server"]
 }
-variable "boot_disk_image" {
-  default = "projects/cos-cloud/global/images/cos-stable-109-17800-66-65"
-}
+
 
 variable "boot_disk_size" {
   default = 10

@@ -4,27 +4,27 @@
 data "google_compute_default_service_account" "default" {
 }
 
-data "google_compute_image" "my_image" {
+data "google_compute_image" "cos_image" {
   family  = "cos-stable"
   project = "cos-cloud"
 }
 
-resource "google_compute_disk" "foobar" {
-  name  = "existing-disk"
-  image = data.google_compute_image.my_image.self_link
+resource "google_compute_disk" "compute_disk" {
+  name  = var.vm_name
+  image = data.google_compute_image.cos_image.self_link
   size  = var.boot_disk_size
   type  = var.boot_disk_type
   zone  = var.vm_zone
 }
 
-resource "google_compute_instance_template" "foobar" {
+resource "google_compute_instance_template" "instance_template" {
   name           = var.vm_name
   machine_type   = var.vm_machine_type
   can_ip_forward = false
   tags           = var.vm_tags
 
   disk {
-    source       = google_compute_disk.foobar.name
+    source       = google_compute_disk.compute_disk.name
     auto_delete  = true
     boot         = true
   }
@@ -43,7 +43,7 @@ resource "google_compute_instance_template" "foobar" {
 
   labels = {
     gce-service-proxy = "on"
-    container-vm = data.google_compute_image.my_image.name
+    container-vm = data.google_compute_image.cos_image.name
 
   }
 
@@ -63,3 +63,15 @@ resource "google_compute_instance_template" "foobar" {
 }
 
 
+
+
+
+# resource "google_compute_instance_group_manager" "instance_group_manager" {
+#     name               = "instance-group-manager"
+#     base_instance_name = "instance-group-manager"
+#     zone               = "us-central1-a"
+#     target_size        = "1"
+#     version {
+#       instance_template  = google_compute_instance_template.instance_template.id
+#     }
+# }
